@@ -1,5 +1,12 @@
 import express from "express";
+import routes from "../routes";
 
-export const globalRouter = express.Router();
+const globalRouter = express.Router();
 
-//export default globalRouter;
+globalRouter.get(routes.home, (req, res) => res.send('Home'));
+globalRouter.get(routes.join, (req, res) => res.send('Join'));
+globalRouter.get(routes.login, (req, res) => res.send('Login'));
+globalRouter.get(routes.logout, (req, res) => res.send('Logout'));
+globalRouter.get(routes.search, (req, res) => res.send('Search'));
+
+export default globalRouter;
