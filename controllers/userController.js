@@ -1,6 +1,6 @@
+import passport from "passport";
 import routes from "../routes";
 import User from "../models/User";
-import passport from "passport";
 
 // Join/Sign up
 export const getJoin = (req, res) => {
@@ -39,8 +39,20 @@ export const postLogin = passport.authenticate("local", {
   successRedirect: routes.home,
 });
 
+export const githubLogin = passport.authenticate("github");
+
+export const githubLoginCallback = (accessToken, refreshToken, profile, cb) => {
+  console.log(accessToken, refreshToken, profile, cb);
+  // TO DO: this is where you implement the communication between server
+  // and database
+};
+
+export const postGithubLogin = (req, res) => {
+  res.send(routes.home);
+};
+
 export const logout = (req, res) => {
-  // To Do: Process Log Out
+  req.logout(); // built in funtion by passport
   res.redirect(routes.home);
 };
 
