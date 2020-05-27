@@ -51,7 +51,7 @@ export const githubLoginCallback = async (
   // Finding user from mongoDB that matches email from github. If found, set its github ID and
   // if not found, create new user
   const {
-    _json: { id, avatar_url, name, email },
+    _json: { id, avatar_url: avatarUrl, name, email },
   } = profile;
   try {
     const user = await User.findOne({ email });
@@ -64,7 +64,7 @@ export const githubLoginCallback = async (
         email,
         name,
         githubId: id,
-        avatarUrl: avatar_url,
+        avatarUrl,
       });
       return cb(null, newUser);
     }
@@ -83,9 +83,15 @@ export const logout = (req, res) => {
   res.redirect(routes.home);
 };
 
+export const getMe = (req, res) => {
+  res.render("userDetail", { pageTitle: "User Details", user: req.user });
+};
+
 export const userDetail = (req, res) =>
   res.render("userDetail", { pageTitle: "User Details" });
+
 export const editProfile = (req, res) =>
   res.render("editProfile", { pageTitle: "Edit Profile" });
+
 export const changePassword = (req, res) =>
   res.render("changePassword", { pageTitle: "Change Password" });
