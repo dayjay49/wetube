@@ -1,6 +1,7 @@
 import passport from "passport";
 import routes from "../routes";
 import User from "../models/User";
+import { NULL } from "node-sass";
 
 // Join/Sign up
 export const getJoin = (req, res) => {
@@ -30,7 +31,7 @@ export const postJoin = async (req, res, next) => {
   }
 };
 
-// Log In
+// Log In Authentications (Local, Facebook, Github)
 export const getLogin = (req, res) => {
   res.render("login", { pageTitle: "Log In" });
 };
@@ -39,15 +40,49 @@ export const postLogin = passport.authenticate("local", {
   successRedirect: routes.home,
 });
 
-export const githubLogin = passport.authenticate("github");
+export const facebookLogin = passport.authenticate("facebook");
+export const facebookLoginCallback = async (
+  accessToken,
+  refreshToken,
+  profile,
+  cb
+) => {
+  console.log(profile);
+  const {
+    _json: { id, name, email },
+  } = profile;
+  try {
+    const user = await User.findOne({ email });
+    console.log(user);
+    if (user) {
+      user.facebookId = id;
+      user.avatarUrl = `https://graph.facebook.com/${id}/picture?type=large`;
+      user.save();
+      return cb(null, user);
+    } else {
+      const newUser = await User.create({
+        email,
+        name,
+        facebookId: id,
+        avatarUrl: `https://graph.facebook.com/${id}/picture?type=large`,
+      });
+      return cb(null, newUser);
+    }
+  } catch (error) {
+    return cb(error);
+  }
+};
+export const postFacebookLogin = (req, res) => {
+  res.redirect(routes.home);
+};
 
+export const githubLogin = passport.authenticate("github");
 export const githubLoginCallback = async (
   accessToken,
   refreshToken,
   profile,
   cb
 ) => {
-  // console.log(profile);
   // Finding user from mongoDB that matches email from github. If found, set its github ID and
   // if not found, create new user
   const {
@@ -55,6 +90,7 @@ export const githubLoginCallback = async (
   } = profile;
   try {
     const user = await User.findOne({ email });
+    console.log(user);
     if (user) {
       user.githubId = id;
       user.save();
@@ -68,12 +104,10 @@ export const githubLoginCallback = async (
       });
       return cb(null, newUser);
     }
-    console.log(user);
   } catch (error) {
     return cb(error);
   }
 };
-
 export const postGithubLogin = (req, res) => {
   res.redirect(routes.home);
 };
@@ -83,12 +117,23 @@ export const logout = (req, res) => {
   res.redirect(routes.home);
 };
 
+// PROFILE PAGE
 export const getMe = (req, res) => {
   res.render("userDetail", { pageTitle: "User Details", user: req.user });
 };
 
-export const userDetail = (req, res) =>
-  res.render("userDetail", { pageTitle: "User Details" });
+export const userDetail = async (req, res) => {
+  const {
+    params: { id },
+  } = req;
+  try {
+    const user = await User.findById(id);
+    res.render("userDetail", { pageTitle: "User Details", user });
+  } catch (error) {
+    // MAYBE TO DO?: alert("User with given ID does not exist! Redirecting to home page...");
+    res.redirect(routes.home);
+  }
+};
 
 export const editProfile = (req, res) =>
   res.render("editProfile", { pageTitle: "Edit Profile" });
