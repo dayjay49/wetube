@@ -1,6 +1,4 @@
 import passport from "passport";
-import dotenv from "dotenv";
-dotenv.config();
 import GithubStrategy from "passport-github";
 import User from "./models/User";
 import { githubLoginCallback } from "./controllers/userController";
