@@ -3,7 +3,7 @@ import routes from "../routes";
 import User from "../models/User";
 import { NULL } from "node-sass";
 
-// Join/Sign up
+// JOIN or SIGN UP
 export const getJoin = (req, res) => {
   res.render("join", { pageTitle: "Join" });
 };
@@ -123,12 +123,14 @@ export const getMe = (req, res) => {
   res.render("userDetail", { pageTitle: "User Details", user: req.user });
 };
 
+// GET USER DETAIL
 export const userDetail = async (req, res) => {
   const {
     params: { id },
   } = req;
   try {
-    const user = await User.findById(id);
+    const user = await User.findById(id).populate("videos");
+    console.log(user);
     res.render("userDetail", { pageTitle: "User Details", user });
   } catch (error) {
     // MAYBE TO DO?: alert("User with given ID does not exist! Redirecting to home page...");
@@ -136,6 +138,7 @@ export const userDetail = async (req, res) => {
   }
 };
 
+// EDIT PROFILE
 export const getEditProfile = (req, res) =>
   res.render("editProfile", { pageTitle: "Edit Profile" });
 
@@ -156,6 +159,7 @@ export const postEditProfile = async (req, res) => {
   }
 };
 
+// CHANGE PASSWORD
 export const getChangePassword = (req, res) =>
   res.render("changePassword", { pageTitle: "Change Password" });
 
