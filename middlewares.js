@@ -9,7 +9,7 @@ export const localsMiddleware = (req, res, next) => {
   res.locals.routes = routes;
   // since this is a middleware of all possible routes, it makes sure
   // to know which user is logged on
-  res.locals.loggedUser = req.user || null;
+  res.locals.loggedUser = req.user || null; // or {} ?
   next();
 };
 
