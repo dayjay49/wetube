@@ -3,6 +3,8 @@ const videoPlayer = document.querySelector("#jsVideoPlayer video");
 const playBtn = document.getElementById("jsPlayButton");
 const volumeBtn = document.getElementById("jsVolumeButton");
 const fullScrnBtn = document.getElementById("jsFullScreen");
+const currentTime = document.getElementById("jsCurrentTime");
+const totalTime = document.getElementById("jsTotalTime");
 
 function handlePlayClick() {
   if (videoPlayer.paused) {
@@ -28,20 +30,72 @@ function exitFullScreen() {
   fullScrnBtn.innerHTML = '<i class="fas fa-expand"></i>';
   fullScrnBtn.removeEventListener("click", exitFullScreen);
   fullScrnBtn.addEventListener("click", goFullScreen);
-  document.webkitExitFullscreen();
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.mozCancelFullScreen) {
+    /* Firefox */
+    document.mozCancelFullScreen();
+  } else if (document.webkitExitFullscreen) {
+    /* Chrome, Safari and Opera */
+    document.webkitExitFullscreen();
+  } else if (document.msExitFullscreen) {
+    /* IE/Edge */
+    document.msExitFullscreen();
+  }
 }
 
 function goFullScreen() {
-  videoContainer.requestFullscreen();
+  if (videoContainer.requestFullscreen) {
+    videoContainer.requestFullscreen();
+  } else if (videoContainer.mozRequestFullScreen) {
+    /* Firefox */
+    videoContainer.mozRequestFullScreen();
+  } else if (videoContainer.webkitRequestFullscreen) {
+    /* Chrome, Safari and Opera */
+    videoContainer.webkitRequestFullscreen();
+  } else if (videoContainer.msRequestFullscreen) {
+    /* IE/Edge */
+    videoContainer.msRequestFullscreen();
+  }
   fullScrnBtn.innerHTML = '<i class="fas fa-compress"></i>';
   fullScrnBtn.removeEventListener("click", goFullScreen);
   fullScrnBtn.addEventListener("click", exitFullScreen);
+}
+
+const formatTime = (seconds) => {
+  const secondsNumber = parseInt(seconds, 10);
+  let hours = Math.floor(secondsNumber / 3600);
+  let minutes = Math.floor((secondsNumber - hours * 3600) / 60);
+  let totalSeconds = secondsNumber - hours * 3600 - minutes * 60;
+
+  if (hours < 10) {
+    hours = `0${hours}`;
+  }
+  if (minutes < 10) {
+    minutes = `0${minutes}`;
+  }
+  if (totalSeconds < 10) {
+    totalSeconds = `0${totalSeconds}`;
+  }
+  return `${hours}:${minutes}:${totalSeconds}`;
+};
+
+function getCurrentTime() {
+  currentTime.innerHTML = formatTime(videoPlayer.currentTime);
+}
+
+function setTotalTime() {
+  const totalTimeString = formatTime(videoPlayer.duration);
+  totalTime.innerHTML = totalTimeString;
+  setInterval(getCurrentTime, 1000);
 }
 
 function init() {
   playBtn.addEventListener("click", handlePlayClick);
   volumeBtn.addEventListener("click", handleVolumeClick);
   fullScrnBtn.addEventListener("click", goFullScreen);
+  videoPlayer.addEventListener("loadedmetadata", setTotalTime);
+  setTotalTime();
 }
 
 if (videoContainer) {
