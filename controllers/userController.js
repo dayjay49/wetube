@@ -115,7 +115,11 @@ export const postGithubLogin = (req, res) => {
 export const logout = (req, res) => {
   req.logout(); // built in funtion by passport
   console.log("Logged Out.....");
-  res.redirect(routes.home);
+  req.session.destroy(function (err) {
+    res.clearCookie("connect.sid");
+    res.redirect(routes.home);
+  });
+  // res.redirect(routes.home);
 };
 
 // PROFILE PAGE

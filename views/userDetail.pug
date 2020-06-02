@@ -12,7 +12,7 @@ block content
                     button ✏ Edit Profile
                 a(href=`/users${routes.changePassword}`)
                     button 🔒 Change Password
-        .uploaded-videos
+        .home-videos
             each item in user.videos   
                 +videoBlock({
                     id: item.id,
