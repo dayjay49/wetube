@@ -104,8 +104,6 @@ export const deleteVideo = async (req, res) => {
   try {
     const video = await Video.findById(id);
     if (video.creator != req.user.id) {
-      // console.log(video.creator);
-      // console.log(req.user.id);
       throw Error();
     } else {
       await Video.findOneAndDelete({ _id: id });
@@ -149,6 +147,33 @@ export const postAddComment = async (req, res) => {
     });
     video.comments.push(newComment.id);
     video.save();
+    res.json({ commentId: newComment.id });
+  } catch (error) {
+    res.status(400);
+  } finally {
+    res.end();
+  }
+};
+
+// Deleting a comment from a video
+export const postDeleteComment = async (req, res) => {
+  const {
+    params: { id },
+    body: { commentId },
+  } = req;
+  try {
+    const video = await Video.findById(id)
+      .populate("creator")
+      .populate("comments");
+    let i;
+    for (i = 0; i < video.comments.length; i++) {
+      if (video.comments[i].id === commentId) {
+        video.comments.splice(i, 1);
+        break;
+      }
+    }
+    video.save();
+    await Comment.findByIdAndDelete(commentId);
   } catch (error) {
     res.status(400);
   } finally {

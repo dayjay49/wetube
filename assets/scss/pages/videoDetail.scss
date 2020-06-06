@@ -56,6 +56,13 @@
         &:not(:last-child) {
           margin-bottom: 15px;
         }
+        .video__comment-delete-btn {
+          background-color: #e74c3c;
+          color: white;
+          width: 20%;
+          margin-top: 10px;
+          margin-left: 5px;
+        }
       }
     }
   }
