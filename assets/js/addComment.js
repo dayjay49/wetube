@@ -1,4 +1,5 @@
 import axios from "axios";
+import handleCommentDelete from "./deleteComment";
 
 const addCommentForm = document.getElementById("jsAddComment");
 const commentList = document.getElementById("jsCommentList");
@@ -13,7 +14,18 @@ const addComment = (comment, id) => {
   li.setAttribute("id", id);
   const span = document.createElement("span");
   span.innerHTML = comment;
+
+  const button = document.createElement("button");
+  const i = document.createElement("i");
+
   li.appendChild(span);
+
+  i.classList.add("fas", "fa-trash-alt");
+  button.classList.add("video__comment-delete-btn");
+  button.addEventListener("click", handleCommentDelete);
+  button.appendChild(i);
+  li.appendChild(button);
+
   commentList.prepend(li);
   increaseCommentCount();
 };

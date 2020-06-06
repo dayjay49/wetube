@@ -30,9 +30,7 @@ const deleteComment = async (commentId) => {
 
 function handleCommentDelete(event) {
   // event.preventDefault();
-  console.log("comment should be deleted!");
   const li = event.target.closest("li");
-  //   console.log(li.id);
   deleteComment(li.id);
 }
 
@@ -48,3 +46,5 @@ function init() {
 if (commentList) {
   init();
 }
+
+export default handleCommentDelete;
