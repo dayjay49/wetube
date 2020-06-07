@@ -12,7 +12,7 @@ export const postJoin = async (req, res, next) => {
     body: { name, email, password, password2 },
   } = req;
   if (password !== password2) {
-    // bad request
+    req.flash("error", "Passwords do NOT match");
     res.status(400);
     res.render("join", { pageTitle: "Join" });
   } else {
@@ -38,16 +38,21 @@ export const getLogin = (req, res) => {
 export const postLogin = passport.authenticate("local", {
   failureRedirect: routes.login,
   successRedirect: routes.home,
+  successFlash: "Welcome",
+  failureFlash: "Can't login. Check email and/or password",
 });
 
-export const facebookLogin = passport.authenticate("facebook");
+export const facebookLogin = passport.authenticate("facebook", {
+  successFlash: "Welcome",
+  failureFlash: "Can't log in at this time",
+});
 export const facebookLoginCallback = async (
   accessToken,
   refreshToken,
   profile,
   cb
 ) => {
-  console.log(profile);
+  // console.log(profile);
   const {
     _json: { id, name, email },
   } = profile;
@@ -76,7 +81,10 @@ export const postFacebookLogin = (req, res) => {
   res.redirect(routes.home);
 };
 
-export const githubLogin = passport.authenticate("github");
+export const githubLogin = passport.authenticate("github", {
+  successFlash: "Welcome",
+  failureFlash: "Can't log in at this time",
+});
 export const githubLoginCallback = async (
   accessToken,
   refreshToken,
@@ -113,13 +121,13 @@ export const postGithubLogin = (req, res) => {
 };
 
 export const logout = (req, res) => {
+  req.flash("info", "Logged out, pce out!");
   req.logout(); // built in funtion by passport
-  console.log("Logged Out.....");
   req.session.destroy(function (err) {
     res.clearCookie("connect.sid");
     res.redirect(routes.home);
   });
-  // res.redirect(routes.home);
+  res.redirect(routes.home);
 };
 
 // PROFILE PAGE
@@ -137,7 +145,7 @@ export const userDetail = async (req, res) => {
     console.log(user);
     res.render("userDetail", { pageTitle: "User Details", user });
   } catch (error) {
-    // MAYBE TO DO?: alert("User with given ID does not exist! Redirecting to home page...");
+    req.flash("error", "User not found");
     res.redirect(routes.home);
   }
 };
@@ -157,8 +165,10 @@ export const postEditProfile = async (req, res) => {
       email,
       avatarUrl: file ? file.location : req.user.avatarUrl,
     });
+    req.flash("success", "Profile Updated!");
     res.redirect(routes.me);
   } catch (error) {
+    req.flash("error", "Can't update profile.");
     res.redirect(routes.editProfile);
   }
 };
@@ -171,19 +181,23 @@ export const postChangePassword = async (req, res) => {
   const {
     body: { oldPassword, newPassword, newPassword1 },
   } = req;
+  const user = await User.findById(req.user._id);
   try {
     if (newPassword !== newPassword1) {
+      req.flash("error", "Passwords do NOT match");
       res.status(400);
-      console.log("NEW PASSWORD VERIFICATION IS WRONG");
       res.redirect(`/users${routes.changePassword}`);
     } else {
-      await req.user.changePassword(oldPassword, newPassword);
-      console.log("SUCCESFULLY CHANGED PASSWORD!");
+      // await req.user.changePassword(oldPassword, newPassword);
+      await user.setPassword(newPassword);
+      user.save();
+      req.flash("success", "Password successfullly changed!");
       res.redirect(routes.me);
     }
   } catch (error) {
+    req.flash("error", "Can't change password");
+    console.log(error);
     res.status(400);
-    console.log("went to error ---------------------------------");
     res.redirect(`/users${routes.changePassword}`);
   }
 };
